@@ -45,6 +45,10 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
         Gdx.gl.glDepthFunc(GL20.GL_LESS);
+        
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
     }
 
     @Override
@@ -66,7 +70,7 @@ public class GameScreen implements Screen {
         }
 
         shapeRenderer.setProjectionMatrix(cam.combined);
-
+/*
         shapeRenderer.begin(ShapeType.Line);
         shapeRenderer.identity();
         shapeRenderer.translate(-7.5f, -7.5f, -7.5f);
@@ -84,33 +88,29 @@ public class GameScreen implements Screen {
             }
         }
         shapeRenderer.end();
-
+*/
         shapeRenderer.begin(ShapeType.Filled);
-        shapeRenderer.identity();
-        shapeRenderer.translate(-7.5f, -7.5f, -7.5f);
-        for (int x = 0; x < grid.length; x++) {
-            for (int y = 0; y < grid[0].length; y++) {
-                for (int z = 0; z < grid[0][0].length; z++) {
-                        if (x == 0 && y == 1 && z == 1) {
-                            shapeRenderer.setColor(0.7f, 0, 0, 0.5f);
-                            shapeRenderer.box(x*5+0.5f, y*5+0.5f, z*5-0.5f, 4f, 4f, 4f);
-                        }
-                        if (x == 0 && y == 1 && z == 0) {
-                            shapeRenderer.setColor(0f, 0, 0.7f, 0.5f);
-                            shapeRenderer.box(x*5+0.25f, y*5+0.25f, z*5-0.25f, 4.5f, 4.5f, 4.5f);
-                        }
-                        if (x == 2 && y == 0 && z == 0) {
-                            shapeRenderer.setColor(0f, 0, 0.7f, 0.5f);
-                            shapeRenderer.box(x*5+0.25f, y*5+0.25f, z*5-0.25f, 4.5f, 4.5f, 4.5f);
-                        }
-                        if (x == 2 && y == 0 && z == 1) {
-                            shapeRenderer.setColor(0f, 0, 0.7f, 0.5f);
-                            shapeRenderer.box(x*5+0.25f, y*5+0.25f, z*5-0.25f, 4.5f, 4.5f, 4.5f);
-                        }
-                        if (x == 1 && y == 2 && z == 1) {
-                            shapeRenderer.setColor(0f, 0, 0.7f, 0.5f);
-                            shapeRenderer.box(x*5+0.25f, y*5+0.25f, z*5-0.25f, 4.5f, 4.5f, 4.5f);
-                        }
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                for (int k = 0; k < grid[0][0].length; k++) {
+                    float x = i-1f;
+                    float y = j-1f;
+                    float z = k-1f;
+                    if (i == 0 && j == 1 && k == 1) {
+                        Cube.render(shapeRenderer, Cell.PLAYER, x*5, y*5, z*5, 0.9f);
+                    }
+                    if (i == 0 && j == 1 && k == 0) {
+                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                    }
+                    if (i == 2 && j == 0 && k == 0) {
+                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                    }
+                    if (i == 2 && j == 0 && k == 1) {
+                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                    }
+                    if (i == 1 && j == 2 && k == 1) {
+                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                    }
                 }
             }
         }
