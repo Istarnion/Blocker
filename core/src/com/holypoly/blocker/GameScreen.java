@@ -25,6 +25,10 @@ public class GameScreen implements Screen {
 
     private ShapeRenderer shapeRenderer;
 
+    private CubeRenderer cubeRenderer;
+    
+    private GridRenderer gridRenderer;
+    
     public GameScreen(Main main) {
         super();
         this.main = main;
@@ -49,6 +53,9 @@ public class GameScreen implements Screen {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         Gdx.gl.glBlendEquation(GL20.GL_FUNC_ADD);
+        
+        cubeRenderer = new CubeRenderer();
+        gridRenderer = new GridRenderer();
     }
 
     @Override
@@ -70,25 +77,10 @@ public class GameScreen implements Screen {
         }
 
         shapeRenderer.setProjectionMatrix(cam.combined);
-/*
         shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.identity();
-        shapeRenderer.translate(-7.5f, -7.5f, -7.5f);
-        for (int x = 0; x < grid.length; x++) {
-            for (int y = 0; y < grid[0].length; y++) {
-                for (int z = 0; z < grid[0][0].length; z++) {
-                    if (z == 1) {
-                        shapeRenderer.setColor(1, 1, 1, 1);
-                    }
-                    else {
-                        shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 0.1f);
-                    }
-                    shapeRenderer.box(x*5, y*5, z*5, 5, 5, 5);
-                }
-            }
-        }
+        gridRenderer.renderGrid(shapeRenderer, 3, 5);
         shapeRenderer.end();
-*/
+        
         shapeRenderer.begin(ShapeType.Filled);
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
@@ -97,19 +89,19 @@ public class GameScreen implements Screen {
                     float y = j-1f;
                     float z = k-1f;
                     if (i == 0 && j == 1 && k == 1) {
-                        Cube.render(shapeRenderer, Cell.PLAYER, x*5, y*5, z*5, 0.9f);
+                        cubeRenderer.render(shapeRenderer, Cell.PLAYER, x*5, y*5, z*5, 0.9f);
                     }
                     if (i == 0 && j == 1 && k == 0) {
-                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
                     }
                     if (i == 2 && j == 0 && k == 0) {
-                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
                     }
                     if (i == 2 && j == 0 && k == 1) {
-                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
                     }
                     if (i == 1 && j == 2 && k == 1) {
-                        Cube.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
+                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x*5, y*5, z*5);
                     }
                 }
             }

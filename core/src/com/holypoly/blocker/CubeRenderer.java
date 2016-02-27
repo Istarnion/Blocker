@@ -7,20 +7,20 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
  *
  * @author istarnion
  */
-public class Cube {
+public class CubeRenderer {
 
     private final static float SIZE = 5.0f;
     
-    public final static Color WHITE = new Color(0.9f, 0.9f, 0.9f, 1);
-    public final static Color PINK = new Color(0.8f, 0, 0.75f, 0.3f);
+    public Color WHITE = new Color(0.9f, 0.9f, 0.9f, 1);
+    public Color PINK = new Color(0.8f, 0, 0.75f, 0.3f);
     
-    private Cube() {}
+    public CubeRenderer() {}
     
-    public static void render(ShapeRenderer r, Cell cell, float x, float y, float z) {
-        Cube.render(r, cell, x, y, z, 1.0f);
+    public void render(ShapeRenderer r, Cell cell, float x, float y, float z) {
+        this.render(r, cell, x, y, z, 1.0f);
     }
     
-    public static void render(ShapeRenderer r, Cell cell, float x, float y, float z, float scale) {
+    public void render(ShapeRenderer r, Cell cell, float x, float y, float z, float scale) {
         switch(cell) {
             case PLAYER:
                 r.setColor(WHITE);
