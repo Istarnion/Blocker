@@ -16,7 +16,7 @@ public class GridRenderer {
     public void renderGrid(ShapeRenderer r, int size, float cellSize) {
         r.setColor(faded);
         
-        r.translate(-(size*cellSize)/2, -(size*cellSize)/2, -(17.5f));
+        r.translate(-(size*cellSize)/2, -(size*cellSize)/2, -(size*cellSize)/2);
         
         for (int x=0; x<size+1; x++) {
             for (int y=0; y<size+1; y++) {
