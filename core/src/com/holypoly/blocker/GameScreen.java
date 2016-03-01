@@ -20,7 +20,13 @@ public class GameScreen implements Screen {
     public Cell[][][] grid;
 
     public PerspectiveCamera cam;
-
+    int camXXSign = 1;
+    int camYXSign = 0;
+    int camZXSign = 0;
+    int camXYSign = 0;
+    int camYYSign = 1;
+    int camZYSign = 0;
+    
     private final ShapeRenderer shapeRenderer;
 
     private final CubeRenderer cubeRenderer;
@@ -31,6 +37,16 @@ public class GameScreen implements Screen {
     float angle = 0;
     
     final float SWIPE_EPSILON = 10f;
+    
+    float theta = 0;    // A value fluctuating between 0 and 1. based on the function updateTheta()
+    float time = 0;     // How much time has passed. Wraps around to 0 from 1. Used to calculate theta.
+    
+    int[] xCoords = new int[27];
+    int[] yCoords = new int[27];
+    int[] zCoords = new int[27];
+    
+    Direction playerDir = Direction.RIGHT;
+    int playerLength = 1;
     
     public GameScreen(Main main) {
         super();
@@ -73,36 +89,16 @@ public class GameScreen implements Screen {
         
         handleRotations(delta);
         
+        updateTheta(delta);
+        
         shapeRenderer.setProjectionMatrix(cam.combined);
         shapeRenderer.begin(ShapeType.Line);
         gridRenderer.renderGrid(shapeRenderer, 3, 1);
         shapeRenderer.end();
         
         shapeRenderer.begin(ShapeType.Filled);
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                for (int k = 0; k < grid[0][0].length; k++) {
-                    float x = i-1;
-                    float y = j-1;
-                    float z = k-1;
-                    if (i == 0 && j == 0 && k == 0) {
-                        cubeRenderer.render(shapeRenderer, Cell.PLAYER, x, y, z, 0.9f);
-                    }
-                    
-                    if (i == 0 && j == 1 && k == 0) {
-                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x, y, z);
-                    }
-                    if (i == 2 && j == 0 && k == 0) {
-                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x, y, z);
-                    }
-                    if (i == 2 && j == 0 && k == 1) {
-                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x, y, z);
-                    }
-                    if (i == 1 && j == 2 && k == 1) {
-                        cubeRenderer.render(shapeRenderer, Cell.DANGER, x, y, z);
-                    }
-                }
-            }
+        for (int i=0; i<playerLength; i++) {
+            cubeRenderer.render(shapeRenderer, Cell.PLAYER, xCoords[i], yCoords[i], zCoords[i]);
         }
         shapeRenderer.end();
     }
@@ -149,33 +145,190 @@ public class GameScreen implements Screen {
     
     public void handleInput() {
         if (!main.touch) {
+            // Rotation of the cube
             if (Gdx.input.isKeyJustPressed(Input.Keys.A) && rotating == Direction.NONE) {
-                rotating = Direction.LEFT;
+                setCamPos(Direction.LEFT);
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.D) && rotating == Direction.NONE) {
-                rotating = Direction.RIGHT;
+                setCamPos(Direction.RIGHT);
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.W) && rotating == Direction.NONE) {
-                rotating = Direction.UP;
+                setCamPos(Direction.UP);
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.S) && rotating == Direction.NONE) {
-                rotating = Direction.DOWN;
+                setCamPos(Direction.DOWN);
+            }
+            
+            // Direction
+            if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+                playerDir = Direction.LEFT;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+                playerDir = Direction.RIGHT;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+                playerDir = Direction.UP;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+                playerDir = Direction.DOWN;
             }
         }
         
         if (rotating == Direction.NONE && (main.touch || (!main.touch && Gdx.input.isButtonPressed(0)))) {
             if (Gdx.input.getDeltaX() > SWIPE_EPSILON && Gdx.input.getDeltaX() > Gdx.input.getDeltaY()) {
-                rotating = Direction.RIGHT;
+                setCamPos(Direction.RIGHT);
             }
             if (Gdx.input.getDeltaX() < -SWIPE_EPSILON && Gdx.input.getDeltaX() < Gdx.input.getDeltaY()) {
-                rotating = Direction.LEFT;
+                setCamPos(Direction.LEFT);
             }
             if (Gdx.input.getDeltaY() > SWIPE_EPSILON && Gdx.input.getDeltaY() > Gdx.input.getDeltaX()) {
-                rotating = Direction.DOWN;
+                setCamPos(Direction.DOWN);
             }
             if (Gdx.input.getDeltaY() < -SWIPE_EPSILON && Gdx.input.getDeltaY() < Gdx.input.getDeltaX()) {
-                rotating = Direction.UP;
+                setCamPos(Direction.UP);
             }
+        }
+    }
+    
+    private void setCamPos(Direction dir) {
+        rotating = dir;
+        
+        switch (dir) {
+            case UP:
+                if (camYYSign > 0) {
+                    camYYSign = 0;
+                    camZYSign = -1;
+                }
+                else if (camYYSign < 0) {
+                    camYYSign = 0;
+                    camZYSign = 1;
+                }
+                else if (camZYSign > 0) {
+                    camYYSign = 1;
+                    camZYSign = 0;
+                }
+                else if (camZYSign < 0) {
+                    camYYSign = -1;
+                    camZYSign = 0;
+                }
+                break;
+            case DOWN:
+                if (camYYSign > 0) {
+                    camYYSign = 0;
+                    camZYSign = 1;
+                }
+                else if (camYYSign < 0) {
+                    camYYSign = 0;
+                    camZYSign = -1;
+                }
+                else if (camZYSign > 0) {
+                    camYYSign = -1;
+                    camZYSign = 0;
+                }
+                else if (camZYSign < 0) {
+                    camYYSign = 1;
+                    camZYSign = 0;
+                }
+                break;
+            case RIGHT:
+                if (camXXSign > 0) {
+                    camXXSign = 0;
+                    camZXSign = 1;
+                }
+                else if (camXXSign < 0) {
+                    camXXSign = 0;
+                    camZXSign = -1;
+                }
+                else if (camZXSign > 0) {
+                    camXXSign = -1;
+                    camZXSign = 0;
+                }
+                else if (camZXSign < 0) {
+                    camXXSign = 1;
+                    camZXSign = 0;
+                }
+                break;
+            case LEFT:
+                if (camXXSign > 0) {
+                    camXXSign = 0;
+                    camZXSign = -1;
+                }
+                else if (camXXSign < 0) {
+                    camXXSign = 0;
+                    camZXSign = 1;
+                }
+                else if (camZXSign > 0) {
+                    camXXSign = 1;
+                    camZXSign = 0;
+                }
+                else if (camZXSign < 0) {
+                    camXXSign = -1;
+                    camZXSign = 0;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    
+    public void updateTheta(float delta) {
+        time += delta*3f;
+        if(time > 1.0) {
+            time -= 1.0;
+            updatePlayer();
+        }
+        
+        double a = 1;
+        double t1 = 0.1f;
+        double t2 = 1;
+        
+        float prev = theta;
+        
+        if (time < t1) {
+            theta = (float)(a * ((time+t1)/t1));
+        }
+        else {
+            theta = (float)(a * ((t2-(time+t1))/(t2-t1)));
+        }
+    }
+    
+    private void updatePlayer() {
+        for (int i=0; i<playerLength; i++) {
+            switch (playerDir) {
+                case RIGHT:
+                    xCoords[playerLength] = xCoords[playerLength-1]+camXXSign;
+                    yCoords[playerLength] = yCoords[playerLength-1]+camYXSign;
+                    zCoords[playerLength] = zCoords[playerLength-1]+camZXSign;
+                    break;
+                case LEFT:
+                    xCoords[playerLength] = xCoords[playerLength-1]-camXXSign;
+                    yCoords[playerLength] = yCoords[playerLength-1]-camYXSign;
+                    zCoords[playerLength] = zCoords[playerLength-1]-camZXSign;
+                    break;
+                case UP:
+                    xCoords[playerLength] = xCoords[playerLength-1]+camXYSign;
+                    yCoords[playerLength] = yCoords[playerLength-1]+camYYSign;
+                    zCoords[playerLength] = zCoords[playerLength-1]+camZYSign;
+                    break;
+                case DOWN:
+                    xCoords[playerLength] = xCoords[playerLength-1]-camXYSign;
+                    yCoords[playerLength] = yCoords[playerLength-1]-camYYSign;
+                    zCoords[playerLength] = zCoords[playerLength-1]-camZYSign;
+                    break;
+                default:
+                    break;
+            }
+            
+            if (xCoords[playerLength] > 1) xCoords[playerLength] = -1;
+            if (xCoords[playerLength] < -1) xCoords[playerLength] = 1;
+            if (yCoords[playerLength] > 1) yCoords[playerLength] = -1;
+            if (yCoords[playerLength] < -1) yCoords[playerLength] = 1;
+            if (zCoords[playerLength] > 1) zCoords[playerLength] = -1;
+            if (zCoords[playerLength] < -1) zCoords[playerLength] = 1;
+            
+            xCoords[i] = xCoords[i+1];
+            yCoords[i] = yCoords[i+1];
+            zCoords[i] = zCoords[i+1];
         }
     }
     
